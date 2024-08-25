@@ -10,6 +10,9 @@
 
 -- Hint: Use the COUNT() function and GROUP BY clause.
 
-SELECT Year, COUNT(*) AS "Total Count"
-FROM Movie
-GROUP BY Year;
+SELECT 
+    Year, COUNT(*) AS "Total Count"
+FROM 
+    Movie
+GROUP BY 
+    Year;

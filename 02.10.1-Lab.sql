@@ -14,6 +14,11 @@
 
 -- Hint: Perform a LEFT JOIN on the Movie and Rating tables, matching the RatingCode and Code columns.
 
-SELECT Movie.Title, Movie.Year, Rating.Description
-From Movie
-LEFT JOIN Rating ON Movie.RatingCode = Rating.Code
+Select
+   M.Title,
+   M.Year,
+   R.Description
+From
+   Movie M
+Left Join
+   Rating R on M.RatingCode = R.Code;
