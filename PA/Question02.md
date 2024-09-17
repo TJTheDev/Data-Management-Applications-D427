@@ -4,10 +4,16 @@ Weight—decimal
 Description—optional variable length string
 LastChangedDate—date
 TrackingNumber—integer
-Which column should be designated the primary key for the Package table?
+## Which column should be designated the primary key for the Package table?
+
+---
 
 Answers:
-Weight
-Description
-LastChangeDate
-TrackingNumber (Correct)
+- Weight
+- Description
+- LastChangeDate
+- TrackingNumber 
+
+---
+
+### The correct answer is TrackingNumber

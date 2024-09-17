@@ -10,11 +10,12 @@ The YearStats table has the following columns:
 Year—integer
 TotalGross—bigint unsigned
 Releases—integer
-Write a SQL statement to designate the Year column in the Movie table as a foreign key to the Year column in the YearStats table.
+## Write a SQL statement to designate the Year column in the Movie table as a foreign key to the Year column in the YearStats table.
 
 Answer:
+---
 ALTER TABLE Movie
 ADD CONSTRAINT fk_movie_year FOREIGN KEY (Year)
     REFERENCES YearStats(Year);
 
-This one marked wrong for some reason(s).
+### This one marked wrong for some reason(s).

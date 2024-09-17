@@ -1,7 +1,13 @@
-Which SQL command is an example of data definition language (DDL)?
+## Which SQL command is an example of data definition language (DDL)?
+
+---
 
 Answers:
-UPDATE
-ALTER (Correct)
-SELECT
-DELETE
+- UPDATE
+- ALTER
+- SELECT
+- DELETE
+
+---
+
+### The correct answer is ALTER
