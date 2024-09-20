@@ -4,5 +4,4 @@ A database has a view named MovieView.
 
 Answer:
 ---
-Alter MovieView
-Delete MovieView
+DROP VIEW MovieView;

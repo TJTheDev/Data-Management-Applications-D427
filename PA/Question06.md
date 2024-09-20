@@ -12,15 +12,15 @@ Do not add any additional constraints to any column beyond what is stated.
 
 Answer:
 ---
-CREATE TABLE Member (
+CREATE TABLE Member(
     ID INT UNSIGNED,
     FirstName VARCHAR(100),
-    MiddleInitial CHAR(1),
-    LastName VARCHAR(100),
+    MiddleInitial Char(1),
+    LastName VarChar(100),
     DateOfBirth DATE,
-    AnnualPledge DECIMAL(8, 2)
+    AnnualPledge Decimal (8,2) UNSIGNED
 );
 
 ---
 
-### This one marked wrong for some reason(s).
+### This one originally marked wrong because I forgot to UNSIGNED the Decimal value

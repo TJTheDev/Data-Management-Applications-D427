@@ -13,8 +13,7 @@ Answer:
 CREATE TABLE Movie (
     Title VARCHAR(30),
     RatingCode VARCHAR(5),
-    CONSTRAINT fk_ratingcode FOREIGN KEY (RatingCode)
-        REFERENCES Rating(RatingCode)
+    FOREIGN KEY (RatingCode) REFERENCES Rating(RatingCode)
 );
 
 ### This one marked wrong for some reason(s).
