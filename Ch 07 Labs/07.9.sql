@@ -1,64 +1,27 @@
--- Introduction
--- The purpose of this lab is to gain familiarity with MySQL Workbench. The lab also ensures the correct version of the Sakila sample database is installed on your computer, for use in other zyLabs.
+-- The database contains a Horse table, with columns:
 
--- This lab has three parts:
+-- ID - integer, primary key
+-- RegisteredName - variable-length string
+-- The database contains a Student table, with columns:
 
--- Install the Sakila database.
--- Run a simple query.
--- Recreate a Sakila table in the zyLab environment.
--- Only the third part is graded.
+-- ID - integer, primary key
+-- FirstName - variable-length string
+-- LastName - variable-length string
+-- Create a third table, named LessonSchedule, with columns:
 
--- Install the Sakila database
--- This lab requires access to MySQL Server via MySQL Workbench. Most students install and access MySQL Server and MySQL Workbench on their personal computer. Installation instructions are available at MySQL Server installation and MySQL Workbench installation.
+-- HorseID - integer with range 0 to 65 thousand, not NULL, foreign key references Horse(ID)
+-- StudentID - integer with range 0 to 65 thousand, foreign key references Student(ID)
+-- LessonDateTime - date/time, not NULL
+-- Primary key is (HorseID, LessonDateTime)
+-- If a row is deleted from Horse, the rows with the same horse ID should be deleted from LessonSchedule automatically.
 
--- To create Sakila tables in MySQL, download the Sakila schema file, open MySQL Workbench, and click the following menu commands:
+-- If a row is deleted from Student, the same student IDs should be set to NULL in LessonSchedule automatically.
 
--- Click 'File' > 'Open SQL Script…' and open the Sakila schema file.
--- Click 'Query' > ''Execute (All or Selection)'.
--- To load sample data to the Sakila tables, download the Sakila data file and repeat steps 1 and 2 with this file.
-
--- Run a simple query
--- Refer to the following MySQL Workbench screenshot, taken from a Mac computer. Workbench looks slightly different on Windows.
-
--- The image is a screenshot of MySQL Workbench running on a Mac computer. The Schemas tab is highlighted. Below Schemas, two circular arrows representing a screen refresh operation are highlighted in a circle. A hierarchical file structure with the folders sakila, then Tables, then film highlighted. The film folder contains several commands with the phrase Select Rows - limit 1000 highlighted.
-
--- If 'sakila' does not appear under 'Schemas', click the refresh icon, in the red circle above. If 'sakila' still does not appear, repeat the installation process or request assistance.
-
--- Depending on Workbench configuration, a different Limit may appear after 'Select Rows'.
-
--- When 'sakila' appears under 'Schemas':
-
--- Click > to expand 'sakila'.
--- Click > to expand 'Tables'.
--- Right-click 'film'.
--- Click 'Select Rows - Limit 1000'.
--- MySQL Workbench executes SELECT * FROM film; and displays 1000 films:
-
--- The image is a screenshot of MySQL Workbench running on a Mac computer. On the left is a list of tables in the Sakila database. In the center, within a query panel, is the statement SELECT * FROM sakila.film;. Below the query panel is a result panel containing the first nine rows of the film table, with a vertical scroll bar so that additional rows can be viewed.
-
--- Recreate a Sakila table in the zyLab environment
--- To recreate the actor table in the zyLab environment:
-
--- Right-click 'actor'.
--- Select 'Copy to Clipboard' > 'Create Statement' to copy the CREATE TABLE statement to your clipboard.
--- Paste the CREATE TABLE statement into the zyLab Main.sql box.
--- Delete the following characters for compatibility with the zyLab environment:
--- COLLATE=utf8mb4_0900_ai_ci
--- all apostrophes (`)
--- The CREATE TABLE statement creates actor columns, keys, and indexes. No result is displayed in Develop mode. The tests in Submit mode verify that the zyLab and Sakila actor tables are identical.
-
-SELECT 
-   a.last_name, 
-   a.first_name, 
-   Round(AVG(f.length)) as Average
-From
-   film_actor fa
-Join
-   actor a on fa.actor_id = a.actor_id
-Join
-   film f on fa.film_id = f.film_id
-Group By
-   a.last_name, a.first_name
-Order By
-   Round(AVG(f.length)) DESC,
-   a.last_name ASC
+Create Table LessonSchedule (
+   HorseID SMALLINT Unsigned Not Null,
+   StudentID SmallInt Unsigned,
+   LessonDateTime DATETIME Not Null,
+   Primary Key (HorseID, LessonDateTime),
+   Foreign Key (HorseID) references Horse(ID) on Delete cascade,
+   Foreign Key (StudentID) references Student(ID) on Delete Set Null
+)
