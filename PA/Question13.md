@@ -15,7 +15,7 @@ Releases—integer
 Answer:
 ---
 ALTER TABLE Movie
-ADD CONSTRAINT fk_movie_year FOREIGN KEY (Year)
+ADD CONSTRAINT FOREIGN KEY (Year)
     REFERENCES YearStats(Year);
 
 ### This one marked wrong for some reason(s).

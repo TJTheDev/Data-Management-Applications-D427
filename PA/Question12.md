@@ -10,4 +10,4 @@ Year—integer
 Answer:
 ---
 ALTER TABLE Movie
-ADD CONSTRAINT pk_movie_id PRIMARY KEY (ID);
+ADD CONSTRAINT PRIMARY KEY (ID);

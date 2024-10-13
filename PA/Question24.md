@@ -9,6 +9,11 @@ Year—integer
 
 Answer:
 ---
-SELECT COUNT(*) AS MovieCount
+<!-- SELECT COUNT(*) AS MovieCount
 FROM Movie
 WHERE Year = 2019;
+ -->
+
+Select Count(*) as "Year Count"
+from Movie
+Where Year = 2019
