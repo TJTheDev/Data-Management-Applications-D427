@@ -1,64 +1,100 @@
--- Introduction
--- The purpose of this lab is to gain familiarity with MySQL Workbench. The lab also ensures the correct version of the Sakila sample database is installed on your computer, for use in other zyLabs.
+-- 5.7 LAB - Query execution plans (Sakila)
+-- This lab illustrates how minor changes in a query may have a significant impact on the execution plan.
 
--- This lab has three parts:
+-- MySQL Workbench exercise
+-- Refer to the film, actor, and film_actor tables of the Sakila database. This exercise is based on the initial Sakila installation. If you have altered these tables or their data, your results may be different.
 
--- Install the Sakila database.
--- Run a simple query.
--- Recreate a Sakila table in the zyLab environment.
--- Only the third part is graded.
+-- Do the following in MySQL Workbench:
 
--- Install the Sakila database
--- This lab requires access to MySQL Server via MySQL Workbench. Most students install and access MySQL Server and MySQL Workbench on their personal computer. Installation instructions are available at MySQL Server installation and MySQL Workbench installation.
+-- Enter the following statements:
+-- USE sakila;
 
--- To create Sakila tables in MySQL, download the Sakila schema file, open MySQL Workbench, and click the following menu commands:
+-- SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+-- FROM actor
+-- INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+-- INNER JOIN film ON film_actor.film_id = film.film_id
+-- WHERE title = "ALONE TRIP"
+-- GROUP BY last_name, first_name
+-- ORDER BY average;
+-- Highlight the SELECT query.
+-- In the main menu, select Query > Explain Current Statement.
+-- In the Display Info box, highlighted in red below, select Data Read per Join.
+-- Workbench displays the following execution plan:
 
--- Click 'File' > 'Open SQL Script…' and open the Sakila schema file.
--- Click 'Query' > ''Execute (All or Selection)'.
--- To load sample data to the Sakila tables, download the Sakila data file and repeat steps 1 and 2 with this file.
+-- Image is a screenshot of Workbench. The SELECT query described in the lab instructions is highlighted. Below the SELECT query is a flowchart diagram, representing an execution plan for the SELECT query. The flowchart contains boxes and diamonds labeled 1 through 7. Box 1 has four labels: 1 row, Non-Unique Key Lookup, film, and idx_title. Box 2 has four labels: 5 rows, Non-Unique Key Lookup, film_actor, and idx_fk_film_id. Diamond 3 has two labels: 5 rows, and nested loop. Arrows from boxes 1 and 2 point to diamond 3. Box 4 has four labels: 1 row, Unique Key Lookup, actor, and PRIMARY. Diamond 5 has two labels: 5 rows, and nested loop. Arrows from diamond 3 and box 4 point to diamond 5. Box 6 has two labels: GROUP, and tmp table. Box 7 has two labels: ORDER and filesort. An arrow from box 6 points to box 7. An arrow from box 7 points to an unnumbered box with two labels: Query cost 3.07, and query_block #1.
 
--- Run a simple query
--- Refer to the following MySQL Workbench screenshot, taken from a Mac computer. Workbench looks slightly different on Windows.
+-- The execution plan depicts the result of EXPLAIN for the SELECT query. The execution plan has seven steps, corresponding to the red numbers on the screenshot:
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. The Schemas tab is highlighted. Below Schemas, two circular arrows representing a screen refresh operation are highlighted in a circle. A hierarchical file structure with the folders sakila, then Tables, then film highlighted. The film folder contains several commands with the phrase Select Rows - limit 1000 highlighted.
+-- Access a single film row using the idx_title index on the title column.
+-- Access matching film_actor rows using the idx_fk_film_id index on the film_id foreign key.
+-- Join the results using the nested loop algorithm.
+-- Access actor rows via the index on the primary key.
+-- Join actor rows with the prior join result using the nested loop algorithm.
+-- Store the result in a temporary table and compute the aggregate function.
+-- Sort and generate the result table.
+-- Refer to MySQL nested loop documentation for an explanation of the nested loop algorithm.
 
--- If 'sakila' does not appear under 'Schemas', click the refresh icon, in the red circle above. If 'sakila' still does not appear, repeat the installation process or request assistance.
+-- Now, replace = in the WHERE clause with < and generate a new execution plan. Step 1 of the execution plan says Index Range Scan. The index scan accesses all films with titles preceding "ALONE TRIP", rather than a single film.
 
--- Depending on Workbench configuration, a different Limit may appear after 'Select Rows'.
+-- Finally, replace < in the WHERE clause with > and generate a third execution plan. Step 1 of the execution plan says Full Table Scan and accesses actor rather than film.
 
--- When 'sakila' appears under 'Schemas':
 
--- Click > to expand 'sakila'.
--- Click > to expand 'Tables'.
--- Right-click 'film'.
--- Click 'Select Rows - Limit 1000'.
--- MySQL Workbench executes SELECT * FROM film; and displays 1000 films:
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. On the left is a list of tables in the Sakila database. In the center, within a query panel, is the statement SELECT * FROM sakila.film;. Below the query panel is a result panel containing the first nine rows of the film table, with a vertical scroll bar so that additional rows can be viewed.
+-- Step 2: Check the number of rows in the relevant tables
+-- SELECT COUNT(*) AS film_count FROM film;
+-- SELECT COUNT(*) AS actor_count FROM actor;
+-- SELECT COUNT(*) AS film_actor_count FROM film_actor;
 
--- Recreate a Sakila table in the zyLab environment
--- To recreate the actor table in the zyLab environment:
+-- -- Step 3: Run the original query to check if it returns results
+-- SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+-- FROM actor
+-- INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+-- INNER JOIN film ON film_actor.film_id = film.film_id
+-- WHERE title = "ALONE TRIP"
+-- GROUP BY last_name, first_name
+-- ORDER BY average;
 
--- Right-click 'actor'.
--- Select 'Copy to Clipboard' > 'Create Statement' to copy the CREATE TABLE statement to your clipboard.
--- Paste the CREATE TABLE statement into the zyLab Main.sql box.
--- Delete the following characters for compatibility with the zyLab environment:
--- COLLATE=utf8mb4_0900_ai_ci
--- all apostrophes (`)
--- The CREATE TABLE statement creates actor columns, keys, and indexes. No result is displayed in Develop mode. The tests in Submit mode verify that the zyLab and Sakila actor tables are identical.
+-- Step 4: If the query above returns results, use EXPLAIN
+EXPLAIN SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+FROM actor
+INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+INNER JOIN film ON film_actor.film_id = film.film_id
+WHERE title = "ALONE TRIP"
+GROUP BY last_name, first_name
+ORDER BY average;
 
-SELECT 
-   a.last_name, 
-   a.first_name, 
-   Round(AVG(f.length)) as Average
-From
-   film_actor fa
-Join
-   actor a on fa.actor_id = a.actor_id
-Join
-   film f on fa.film_id = f.film_id
-Group By
-   a.last_name, a.first_name
-Order By
-   Round(AVG(f.length)) DESC,
-   a.last_name ASC
+-- -- Step 5: Modify the WHERE clause to check for other titles
+-- SELECT DISTINCT title FROM film;
+
+-- -- Step 6: Test with < and >
+-- SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+-- FROM actor
+-- INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+-- INNER JOIN film ON film_actor.film_id = film.film_id
+-- WHERE title < "ALONE TRIP"
+-- GROUP BY last_name, first_name
+-- ORDER BY average;
+
+EXPLAIN SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+FROM actor
+INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+INNER JOIN film ON film_actor.film_id = film.film_id
+WHERE title < "ALONE TRIP"
+GROUP BY last_name, first_name
+ORDER BY average;
+
+-- SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+-- FROM actor
+-- INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+-- INNER JOIN film ON film_actor.film_id = film.film_id
+-- WHERE title > "ALONE TRIP"
+-- GROUP BY last_name, first_name
+-- ORDER BY average;
+
+EXPLAIN SELECT last_name, first_name, ROUND(AVG(length), 0) AS average
+FROM actor
+INNER JOIN film_actor ON film_actor.actor_id = actor.actor_id
+INNER JOIN film ON film_actor.film_id = film.film_id
+WHERE title > "ALONE TRIP"
+GROUP BY last_name, first_name
+ORDER BY average;

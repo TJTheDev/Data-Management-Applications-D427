@@ -1,64 +1,64 @@
--- Introduction
--- The purpose of this lab is to gain familiarity with MySQL Workbench. The lab also ensures the correct version of the Sakila sample database is installed on your computer, for use in other zyLabs.
+-- 4.12 LAB - Implement strong entity (Sakila)
+-- Implement a new strong entity phone in the Sakila database. Attributes and relationships are shown in the following diagram:
 
--- This lab has three parts:
+-- The diagram uses Sakila naming conventions. Follow the Sakila conventions for your table and column names:
 
--- Install the Sakila database.
--- Run a simple query.
--- Recreate a Sakila table in the zyLab environment.
--- Only the third part is graded.
+-- All lower case
+-- Underscore separator between root and suffix
+-- Foreign keys have the same name as referenced primary key
+-- Write CREATE TABLE and ALTER TABLE statements that:
 
--- Install the Sakila database
--- This lab requires access to MySQL Server via MySQL Workbench. Most students install and access MySQL Server and MySQL Workbench on their personal computer. Installation instructions are available at MySQL Server installation and MySQL Workbench installation.
+-- Implement the entity as a new phone table.
+-- Implement the has relationships as foreign keys in the Sakila customer, staff, and store tables.
+-- Remove the existing phone column from the Sakila address table.
+-- Step 2 requires adding a foreign key constraint to an existing table. Ex:
 
--- To create Sakila tables in MySQL, download the Sakila schema file, open MySQL Workbench, and click the following menu commands:
+-- ALTER TABLE customer 
+--   ADD FOREIGN KEY (phone_id) REFERENCES phone(phone_id)
+--   ON DELETE SET NULL
+--   ON UPDATE CASCADE;
+-- Specify data types as follows:
 
--- Click 'File' > 'Open SQL Script…' and open the Sakila schema file.
--- Click 'Query' > ''Execute (All or Selection)'.
--- To load sample data to the Sakila tables, download the Sakila data file and repeat steps 1 and 2 with this file.
+-- phone_id, phone_number, and country_code have data type INT.
+-- phone_type has data type VARCHAR(12) and contains strings like 'Home', 'Mobile', and 'Other'.
+-- Apply these constraints:
 
--- Run a simple query
--- Refer to the following MySQL Workbench screenshot, taken from a Mac computer. Workbench looks slightly different on Windows.
+-- NOT NULL and UNIQUE constraints correspond to cardinalities on the diagram above.
+-- Foreign key actions are SET NULL for delete rules and CASCADE for update rules.
+-- Specify a suitable column as the phone table primary key.
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. The Schemas tab is highlighted. Below Schemas, two circular arrows representing a screen refresh operation are highlighted in a circle. A hierarchical file structure with the folders sakila, then Tables, then film highlighted. The film folder contains several commands with the phrase Select Rows - limit 1000 highlighted.
+-- Create the phone table with the corrected definition
+CREATE TABLE phone (
+    phone_id INT PRIMARY KEY,
+    country_code INT NOT NULL,
+    phone_number INT NOT NULL,
+    phone_type VARCHAR(12) NULL
+);
 
--- If 'sakila' does not appear under 'Schemas', click the refresh icon, in the red circle above. If 'sakila' still does not appear, repeat the installation process or request assistance.
+-- Add phone_id as a foreign key in the customer table with UNIQUE constraint
+ALTER TABLE customer 
+    ADD phone_id INT,
+    ADD CONSTRAINT UNIQUE (phone_id),
+    ADD FOREIGN KEY (phone_id) REFERENCES phone(phone_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
--- Depending on Workbench configuration, a different Limit may appear after 'Select Rows'.
+-- Add phone_id as a foreign key in the staff table with UNIQUE constraint
+ALTER TABLE staff 
+    ADD phone_id INT,
+    ADD CONSTRAINT UNIQUE (phone_id),
+    ADD FOREIGN KEY (phone_id) REFERENCES phone(phone_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
--- When 'sakila' appears under 'Schemas':
+-- Add phone_id as a foreign key in the store table with UNIQUE constraint
+ALTER TABLE store 
+    ADD phone_id INT,
+    ADD CONSTRAINT UNIQUE (phone_id),
+    ADD FOREIGN KEY (phone_id) REFERENCES phone(phone_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
 
--- Click > to expand 'sakila'.
--- Click > to expand 'Tables'.
--- Right-click 'film'.
--- Click 'Select Rows - Limit 1000'.
--- MySQL Workbench executes SELECT * FROM film; and displays 1000 films:
-
--- The image is a screenshot of MySQL Workbench running on a Mac computer. On the left is a list of tables in the Sakila database. In the center, within a query panel, is the statement SELECT * FROM sakila.film;. Below the query panel is a result panel containing the first nine rows of the film table, with a vertical scroll bar so that additional rows can be viewed.
-
--- Recreate a Sakila table in the zyLab environment
--- To recreate the actor table in the zyLab environment:
-
--- Right-click 'actor'.
--- Select 'Copy to Clipboard' > 'Create Statement' to copy the CREATE TABLE statement to your clipboard.
--- Paste the CREATE TABLE statement into the zyLab Main.sql box.
--- Delete the following characters for compatibility with the zyLab environment:
--- COLLATE=utf8mb4_0900_ai_ci
--- all apostrophes (`)
--- The CREATE TABLE statement creates actor columns, keys, and indexes. No result is displayed in Develop mode. The tests in Submit mode verify that the zyLab and Sakila actor tables are identical.
-
-SELECT 
-   a.last_name, 
-   a.first_name, 
-   Round(AVG(f.length)) as Average
-From
-   film_actor fa
-Join
-   actor a on fa.actor_id = a.actor_id
-Join
-   film f on fa.film_id = f.film_id
-Group By
-   a.last_name, a.first_name
-Order By
-   Round(AVG(f.length)) DESC,
-   a.last_name ASC
+-- Remove the existing phone column from the address table
+ALTER TABLE address 
+    DROP COLUMN phone;

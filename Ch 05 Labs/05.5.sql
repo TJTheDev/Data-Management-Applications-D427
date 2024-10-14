@@ -1,64 +1,60 @@
--- Introduction
--- The purpose of this lab is to gain familiarity with MySQL Workbench. The lab also ensures the correct version of the Sakila sample database is installed on your computer, for use in other zyLabs.
+-- 5.5 LAB - Create index and explain (Sakila)
+-- This lab illustrates the use of indexes and EXPLAIN to optimize query performance. Refer to EXPLAIN documentation for information about EXPLAIN result columns.
 
--- This lab has three parts:
+-- Refer to the film table of the Sakila database. Write and run seven SQL statements:
 
--- Install the Sakila database.
--- Run a simple query.
--- Recreate a Sakila table in the zyLab environment.
--- Only the third part is graded.
+-- Explain the query SELECT * FROM film WHERE title = 'ALONE TRIP';.
 
--- Install the Sakila database
--- This lab requires access to MySQL Server via MySQL Workbench. Most students install and access MySQL Server and MySQL Workbench on their personal computer. Installation instructions are available at MySQL Server installation and MySQL Workbench installation.
+-- In the EXPLAIN result, column key is null, indicating no index is available for the query. Column rows is 100, indicating all rows are read. The query executes a table scan and is slow.
 
--- To create Sakila tables in MySQL, download the Sakila schema file, open MySQL Workbench, and click the following menu commands:
+-- Create an index idx_title on the title column.
 
--- Click 'File' > 'Open SQL Script…' and open the Sakila schema file.
--- Click 'Query' > ''Execute (All or Selection)'.
--- To load sample data to the Sakila tables, download the Sakila data file and repeat steps 1 and 2 with this file.
+-- Explain the query of step 1 again.
 
--- Run a simple query
--- Refer to the following MySQL Workbench screenshot, taken from a Mac computer. Workbench looks slightly different on Windows.
+-- In the EXPLAIN result, column key has value idx_title, indicating the query uses the index on title. Column rows is 1, indicating only one table row is read. The query is fast.
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. The Schemas tab is highlighted. Below Schemas, two circular arrows representing a screen refresh operation are highlighted in a circle. A hierarchical file structure with the folders sakila, then Tables, then film highlighted. The film folder contains several commands with the phrase Select Rows - limit 1000 highlighted.
+-- Explain the query SELECT * FROM film WHERE title > 'ALONE TRIP';.
 
--- If 'sakila' does not appear under 'Schemas', click the refresh icon, in the red circle above. If 'sakila' still does not appear, repeat the installation process or request assistance.
+-- In the EXPLAIN result, column key is null, indicating the query does not use the idx_title index. Column rows is 100, indicating all rows are read. Since the query has > in the WHERE clause rather than =, the query executes a table scan and is slow.
 
--- Depending on Workbench configuration, a different Limit may appear after 'Select Rows'.
+-- Explain the query SELECT rating, count(*) FROM film GROUP BY rating;
 
--- When 'sakila' appears under 'Schemas':
+-- In the EXPLAIN result, column key is null, indicating no index is available for the query. Column rows is 100, indicating all rows are read. The query executes a table scan and is slow.
 
--- Click > to expand 'sakila'.
--- Click > to expand 'Tables'.
--- Right-click 'film'.
--- Click 'Select Rows - Limit 1000'.
--- MySQL Workbench executes SELECT * FROM film; and displays 1000 films:
+-- Create an index idx_rating on the rating column.
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. On the left is a list of tables in the Sakila database. In the center, within a query panel, is the statement SELECT * FROM sakila.film;. Below the query panel is a result panel containing the first nine rows of the film table, with a vertical scroll bar so that additional rows can be viewed.
+-- Explain the query of step 5 again.
 
--- Recreate a Sakila table in the zyLab environment
--- To recreate the actor table in the zyLab environment:
+-- In the EXPLAIN result, column key has value idx_rating, indicating the query reads rating values from the index. The query uses an index scan, which is faster than a table scan (step 5).
 
--- Right-click 'actor'.
--- Select 'Copy to Clipboard' > 'Create Statement' to copy the CREATE TABLE statement to your clipboard.
--- Paste the CREATE TABLE statement into the zyLab Main.sql box.
--- Delete the following characters for compatibility with the zyLab environment:
--- COLLATE=utf8mb4_0900_ai_ci
--- all apostrophes (`)
--- The CREATE TABLE statement creates actor columns, keys, and indexes. No result is displayed in Develop mode. The tests in Submit mode verify that the zyLab and Sakila actor tables are identical.
+-- For submit-mode testing, all seven statements must appear in Main.sql in the correct order.
 
-SELECT 
-   a.last_name, 
-   a.first_name, 
-   Round(AVG(f.length)) as Average
-From
-   film_actor fa
-Join
-   actor a on fa.actor_id = a.actor_id
-Join
-   film f on fa.film_id = f.film_id
-Group By
-   a.last_name, a.first_name
-Order By
-   Round(AVG(f.length)) DESC,
-   a.last_name ASC
+-- NOTES:
+
+-- SELECT * FROM film; generates too many characters to display in the zyLab environment. However, statements with less output, such as SELECT title FROM film;, execute successfully.
+
+-- If you try this lab in MySQL Workbench, drop the index idx_title from film prior to executing statement 1.
+
+-- In submit-mode tests that generate multiple result tables, the results are merged. Although the tests run correctly, the results appear in one table.
+
+
+-- Step 1: Explain the initial query without an index
+EXPLAIN SELECT * FROM film WHERE title = 'ALONE TRIP';
+
+-- Step 2: Create an index on the title column
+CREATE INDEX idx_title ON film(title);
+
+-- Step 3: Explain the query again after creating the index
+EXPLAIN SELECT * FROM film WHERE title = 'ALONE TRIP';
+
+-- Step 4: Explain the query with a range condition
+EXPLAIN SELECT * FROM film WHERE title > 'ALONE TRIP';
+
+-- Step 5: Explain the query that groups by rating
+EXPLAIN SELECT rating, COUNT(*) FROM film GROUP BY rating;
+
+-- Step 6: Create an index on the rating column
+CREATE INDEX idx_rating ON film(rating);
+
+-- Step 7: Explain the query again after creating the index on rating
+EXPLAIN SELECT rating, COUNT(*) FROM film GROUP BY rating;

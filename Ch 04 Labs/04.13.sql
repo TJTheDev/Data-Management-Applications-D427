@@ -1,64 +1,75 @@
--- Introduction
--- The purpose of this lab is to gain familiarity with MySQL Workbench. The lab also ensures the correct version of the Sakila sample database is installed on your computer, for use in other zyLabs.
+-- 4.13 LAB - Implement supertype and subtype entities (Sakila)
+-- Similar entities have many common attributes and relationships. Similar entities are often converted into subtypes of a supertype entity, as illustrated in this lab.
 
--- This lab has three parts:
+-- In the Sakila database, the customer and staff tables have several common columns. Convert these tables into subtypes of person. Specifically, write CREATE TABLE statements for person, customer, and staff that implement this ER diagram:
 
--- Install the Sakila database.
--- Run a simple query.
--- Recreate a Sakila table in the zyLab environment.
--- Only the third part is graded.
+-- Follow Sakila conventions for table and column names:
 
--- Install the Sakila database
--- This lab requires access to MySQL Server via MySQL Workbench. Most students install and access MySQL Server and MySQL Workbench on their personal computer. Installation instructions are available at MySQL Server installation and MySQL Workbench installation.
+-- All lower case
+-- Underscore separator between root and suffix
+-- Foreign keys have the same name as referenced primary key
+-- Implement attributes as columns:
 
--- To create Sakila tables in MySQL, download the Sakila schema file, open MySQL Workbench, and click the following menu commands:
+-- All columns are NOT NULL.
+-- The primary key of all three tables is person_id with data type SMALLINT UNSIGNED.
+-- The last_update and create_date columns have data type TIMESTAMP.
+-- The picture column has data type BLOB.
+-- All other columns have data type VARCHAR(20).
+-- Implement the belongs_to and works_at relationships as foreign keys:
 
--- Click 'File' > 'Open SQL Script…' and open the Sakila schema file.
--- Click 'Query' > ''Execute (All or Selection)'.
--- To load sample data to the Sakila tables, download the Sakila data file and repeat steps 1 and 2 with this file.
+-- belongs_to becomes an address_id foreign key in person with data type SMALLINT UNSIGNED.
+-- works_at becomes a store_id foreign key in staff with data type TINYINT UNSIGNED.
+-- Specify RESTRICT actions for both foreign keys.
+-- Subtype entities have an IsA relationship to the supertype. Implement these relationships as foreign keys:
 
--- Run a simple query
--- Refer to the following MySQL Workbench screenshot, taken from a Mac computer. Workbench looks slightly different on Windows.
+-- The person_id columns of customer and staff become foreign keys referring to person.
+-- Specify CASCADE actions for both foreign keys.
+-- NOTE: If you execute your solution with the Sakila database, you must first drop customer, staff, and all constraints that refer to these tables. Use the following statements with Sakila only, not in the zyLab environment:
 
--- The image is a screenshot of MySQL Workbench running on a Mac computer. The Schemas tab is highlighted. Below Schemas, two circular arrows representing a screen refresh operation are highlighted in a circle. A hierarchical file structure with the folders sakila, then Tables, then film highlighted. The film folder contains several commands with the phrase Select Rows - limit 1000 highlighted.
+-- ALTER TABLE payment 
+--    DROP CONSTRAINT fk_payment_customer,
+--    DROP CONSTRAINT fk_payment_staff;
+-- ALTER TABLE rental 
+--    DROP CONSTRAINT fk_rental_customer,
+--    DROP CONSTRAINT fk_rental_staff; 
+-- ALTER TABLE store
+--    DROP CONSTRAINT fk_store_staff;
+-- DROP TABLE customer, staff;
 
--- If 'sakila' does not appear under 'Schemas', click the refresh icon, in the red circle above. If 'sakila' still does not appear, repeat the installation process or request assistance.
+-- Create the person table
+CREATE TABLE person (
+    person_id SMALLINT UNSIGNED PRIMARY KEY,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    email VARCHAR(20) NOT NULL,
+    address_id SMALLINT UNSIGNED NOT NULL,
+    active VARCHAR(20) NOT NULL,
+    last_update TIMESTAMP NOT NULL,
+    FOREIGN KEY (address_id) REFERENCES address(address_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+);
 
--- Depending on Workbench configuration, a different Limit may appear after 'Select Rows'.
+-- Create the customer table as a subtype of person
+CREATE TABLE customer (
+    person_id SMALLINT UNSIGNED PRIMARY KEY,
+    create_date TIMESTAMP NOT NULL,
+    FOREIGN KEY (person_id) REFERENCES person(person_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
 
--- When 'sakila' appears under 'Schemas':
-
--- Click > to expand 'sakila'.
--- Click > to expand 'Tables'.
--- Right-click 'film'.
--- Click 'Select Rows - Limit 1000'.
--- MySQL Workbench executes SELECT * FROM film; and displays 1000 films:
-
--- The image is a screenshot of MySQL Workbench running on a Mac computer. On the left is a list of tables in the Sakila database. In the center, within a query panel, is the statement SELECT * FROM sakila.film;. Below the query panel is a result panel containing the first nine rows of the film table, with a vertical scroll bar so that additional rows can be viewed.
-
--- Recreate a Sakila table in the zyLab environment
--- To recreate the actor table in the zyLab environment:
-
--- Right-click 'actor'.
--- Select 'Copy to Clipboard' > 'Create Statement' to copy the CREATE TABLE statement to your clipboard.
--- Paste the CREATE TABLE statement into the zyLab Main.sql box.
--- Delete the following characters for compatibility with the zyLab environment:
--- COLLATE=utf8mb4_0900_ai_ci
--- all apostrophes (`)
--- The CREATE TABLE statement creates actor columns, keys, and indexes. No result is displayed in Develop mode. The tests in Submit mode verify that the zyLab and Sakila actor tables are identical.
-
-SELECT 
-   a.last_name, 
-   a.first_name, 
-   Round(AVG(f.length)) as Average
-From
-   film_actor fa
-Join
-   actor a on fa.actor_id = a.actor_id
-Join
-   film f on fa.film_id = f.film_id
-Group By
-   a.last_name, a.first_name
-Order By
-   Round(AVG(f.length)) DESC,
-   a.last_name ASC
+-- Create the staff table as a subtype of person
+CREATE TABLE staff (
+    person_id SMALLINT UNSIGNED PRIMARY KEY,
+    picture BLOB NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    password VARCHAR(20) NOT NULL,
+    store_id TINYINT UNSIGNED NOT NULL,
+    FOREIGN KEY (person_id) REFERENCES person(person_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES store(store_id)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+);
