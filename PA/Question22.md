@@ -7,4 +7,4 @@ Answer:
 - SELECT M.Title, A.Actor FROM Movie M RIGHT JOIN Actor A ON M.ActorID = A.ID
 - SELECT M.Title, A.Actor FROM Movie M INNER JOIN Actor A ON M.ActorID = A.ID
 
-### The correct answer is Left Join 
+### The correct answer is Right Join 
