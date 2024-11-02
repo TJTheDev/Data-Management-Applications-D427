@@ -17,5 +17,3 @@ Answer:
 ALTER TABLE Movie
 ADD CONSTRAINT FOREIGN KEY (Year)
     REFERENCES YearStats(Year);
-
-### This one marked wrong for some reason(s).
